@@ -3,8 +3,8 @@ These algorithms will implement and compare performance of parallel CPU based al
 
 
 **Implemented algorithms:**
-- Mergesort
-- Quicksort
-- Radix sort
-- Brick sort
-- Bitonic sort
+- Merge Sort
+- Quick Sort
+- Radix Sort
+- Brick Sort
+- Bitonic Sort
