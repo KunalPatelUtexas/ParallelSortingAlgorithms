@@ -1,8 +1,14 @@
+// CSE 373, Winter 2013, Marty Stepp
+// A Sorter represents a task that can be run in a thread.
+// It performs a merge sort on a given array.
+// The idea is that the overall parallel merge sort method can create
+// several Sorters, each for a given range of the array, and ask them to sort
+// different portions of the array in parallel.
+// Then it will merge the pieces in a single thread.
 
 
+import java.util.*;
 
-
-import java.util.*;   // for Random
 
 public class MergeSort {
 	private static final Random RAND = new Random(42);   // random number generator
@@ -13,10 +19,6 @@ public class MergeSort {
 			long startTime = System.nanoTime();
 			parallelMergeSort(a);
 			long endTime = System.nanoTime();
-			
-			if (!isSorted(a)) {
-				throw new RuntimeException("not sorted afterward: " + Arrays.toString(a));
-			}
 
 
 			return (endTime - startTime);
@@ -24,8 +26,8 @@ public class MergeSort {
 	}
 	
 	public static void parallelMergeSort(int[] a) {
-		// int cores = Runtime.getRuntime().availableProcessors();
-		int cores = 8;
+		int cores = Runtime.getRuntime().availableProcessors();
+		//int cores = 8;
 		parallelMergeSort(a, cores);
 	}
 	
@@ -76,6 +78,7 @@ public class MergeSort {
 	
 	// Combines the contents of sorted left/right arrays into output array a.
 	// Assumes that left.length + right.length == a.length.
+	
 	public static void merge(int[] left, int[] right, int[] a) {
 		int i1 = 0;
 		int i2 = 0;
@@ -89,51 +92,5 @@ public class MergeSort {
 			}
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	// Swaps the values at the two given indexes in the given array.
-	public static final void swap(int[] a, int i, int j) {
-		if (i != j) {
-			int temp = a[i];
-			a[i] = a[j];
-			a[j] = temp;
-		}
-	}
-	
-	// Randomly rearranges the elements of the given array.
-	public static void shuffle(int[] a) {
-		for (int i = 0; i < a.length; i++) {
-			// move element i to a random index in [i .. length-1]
-			int randomIndex = (int) (Math.random() * a.length - i);
-			swap(a, i, i + randomIndex);
-		}
-	}
-	
-	// Returns true if the given array is in sorted ascending order.
-	public static boolean isSorted(int[] a) {
-		for (int i = 0; i < a.length - 1; i++) {
-			if (a[i] > a[i + 1]) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	
 
-	// Creates an array of the given length, fills it with random
-	// non-negative integers, and returns it.
-	public static int[] createRandomArray(int length) {
-		int[] a = new int[length];
-		for (int i = 0; i < a.length; i++) {
-			a[i] = RAND.nextInt(1000000);
-			// a[i] = RAND.nextInt(40);
-		}
-		return a;
-	}
 }
