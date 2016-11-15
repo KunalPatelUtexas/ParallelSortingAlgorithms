@@ -1,49 +1,39 @@
-// CSE 373, Winter 2013, Marty Stepp
-// A Sorter represents a task that can be run in a thread.
-// It performs a merge sort on a given array.
-// The idea is that the overall parallel merge sort method can create
-// several Sorters, each for a given range of the array, and ask them to sort
-// different portions of the array in parallel.
-// Then it will merge the pieces in a single thread.
-
-
 import java.util.*;
 
 
-public class MergeSort {
-	private static final Random RAND = new Random(42);   // random number generator
+public class  MergeSort {
+	private static final Random RAND = new Random(50);
+	private static final int cores = Runtime.getRuntime().availableProcessors();
 
 	public static long start(int[] a) throws Throwable {
-	
-			// run the algorithm and time how long it takes
-			long startTime = System.nanoTime();
-			parallelMergeSort(a);
-			long endTime = System.nanoTime();
-
-
-			return (endTime - startTime);
-		
-	}
-	
-	public static void parallelMergeSort(int[] a) {
-		int cores = Runtime.getRuntime().availableProcessors();
-		//int cores = 8;
+		long startTime = System.nanoTime();
 		parallelMergeSort(a, cores);
+		long endTime = System.nanoTime();
+		return (endTime - startTime);
 	}
 	
-	public static void parallelMergeSort(int[] a, int threadCount) {
-		if (threadCount <= 1) {
-			mergeSort(a);
-		} else if (a.length >= 2) {
-			// split array in half
+	
+	public static void parallelMergeSort(int[] a, int numThreads) {
+		try{
+			if (numThreads <= 1) {
+				mergeSort(a);
+			} else if (a.length >= 2) {			
+				splitMerge(a, numThreads);
+			}
+	   } catch (Exception e) {
+			e.printStackTrace(System.out);
+	   }
+	}
+
+	/*
+	 * Split a[] in half and create a thread for reach half
+	 */
+	private static void splitMerge(int[] a, int numThreads) {
+		try {
 			int[] left  = Arrays.copyOfRange(a, 0, a.length / 2);
 			int[] right = Arrays.copyOfRange(a, a.length / 2, a.length);
-			
-			// sort the halves
-			// mergeSort(left);
-			// mergeSort(right);
-			Thread lThread = new Thread(new Sorter(left,  threadCount / 2));
-			Thread rThread = new Thread(new Sorter(right, threadCount / 2));
+			Thread lThread = new Thread(new Sorter(left,  numThreads / 2));
+			Thread rThread = new Thread(new Sorter(right, numThreads / 2));
 			lThread.start();
 			rThread.start();
 			
@@ -52,44 +42,76 @@ public class MergeSort {
 				rThread.join();
 			} catch (InterruptedException ie) {}
 			
-			// merge them back together
 			merge(left, right, a);
-		}
+	   } catch (Exception e) {
+			e.printStackTrace(System.out);
+	   }
+		
 	}
 	
-	// Arranges the elements of the given array into sorted order
-	// using the "merge sort" algorithm, which splits the array in half,
-	// recursively sorts the halves, then merges the sorted halves.
-	// It is O(N log N) for all inputs.
+	/*
+	 * Helper method to sort each side of the arrays
+	 */
 	public static void mergeSort(int[] a) {
-		if (a.length >= 2) {
-			// split array in half
-			int[] left  = Arrays.copyOfRange(a, 0, a.length / 2);
-			int[] right = Arrays.copyOfRange(a, a.length / 2, a.length);
-			
-			// sort the halves
-			mergeSort(left);
-			mergeSort(right);
-			
-			// merge them back together
-			merge(left, right, a);
-		}
+		try {
+		
+			if (a.length >= 2) {
+				int[] left  = Arrays.copyOfRange(a, 0, a.length / 2);
+				int[] right = Arrays.copyOfRange(a, a.length / 2, a.length);
+				
+				mergeSort(left);
+				mergeSort(right);
+				
+				merge(left, right, a);
+			}
+	   } catch (Exception e) {
+			e.printStackTrace(System.out);
+	   }
+	}
+
+	/*
+	 * Merge left[] and right[] into a[] in O(n) time
+	 */
+	public static void merge(int[] left, int[] right, int[] a) {
+		try {
+			int left_index = 0;
+			int right_index = 0;
+			for (int i = 0; i < a.length; i++) {
+				/*
+				 * if right_index != valid, left index == valid, and left < right, populate from left side
+				 * else, populate from right array
+				 */
+				if (right_index >= right.length || (left_index < left.length && left[left_index] < right[right_index])) {
+					a[i] = left[left_index];
+					left_index++;
+				} else {
+					a[i] = right[right_index];
+					right_index++;
+				}
+			}
+	   } catch (Exception e) {
+			e.printStackTrace(System.out);
+	   }
 	}
 	
-	// Combines the contents of sorted left/right arrays into output array a.
-	// Assumes that left.length + right.length == a.length.
-	
-	public static void merge(int[] left, int[] right, int[] a) {
-		int i1 = 0;
-		int i2 = 0;
-		for (int i = 0; i < a.length; i++) {
-			if (i2 >= right.length || (i1 < left.length && left[i1] < right[i2])) {
-				a[i] = left[i1];
-				i1++;
-			} else {
-				a[i] = right[i2];
-				i2++;
-			}
+	/*
+	 * Helper class that runs Sorter thread
+	 */
+	public static class  Sorter implements Runnable {
+		private int[] a;
+		private int numThreads;
+		
+		public Sorter(int[] a, int numThreads) {
+			this.a = a;
+			this.numThreads = numThreads;
+		}
+		
+		public void run() {
+			try {
+				MergeSort.parallelMergeSort(a, numThreads);
+		    } catch (Exception e) {
+				e.printStackTrace(System.out);
+		    }
 		}
 	}
 

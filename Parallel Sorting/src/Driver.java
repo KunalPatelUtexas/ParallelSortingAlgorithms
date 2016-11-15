@@ -1,4 +1,10 @@
-import java.util.ArrayList;
+/*
+ * Driver.java
+ * This is the Driver that will execute 5 parallel sorting algorithms: Merge Sort, Quick Sort, Radix Sort,
+ * Brick Sort, and Bitonic Sort. Each Algorithm will take the same input array for consistency, and return
+ * the total execution time.
+ */
+
 import java.util.Random;
 
 
@@ -6,39 +12,36 @@ public class Driver {
 
 	public static void main(String[] args) {
 
-		int LENGTH = 10;
-	    Random randomGenerator = new Random();
-	    int[] arrayMerge = new int[LENGTH];
-	    int[] arrayRadix = new int[LENGTH];
+		int LENGTH = 16;
+	    Random randomGenerator = new Random(42);
 	    
-	    for (int i = 0; i < LENGTH; i++){
-	      int randomInt = randomGenerator.nextInt(1000000);
-	      arrayMerge[i] = randomInt;
-	      arrayRadix[i] = randomInt;
-	    }
-	    
-	    try {
+	    for(int k = 2; LENGTH < 1000000; LENGTH = LENGTH*k){
 	    	
-			long RadixTime = RadixSort.start(arrayRadix);
-			long MergeTime = MergeSort.start(arrayMerge);
+		    int[] arrayMerge = new int[LENGTH];
+		    int[] arrayRadix = new int[LENGTH];
+	 
+		    for (int i = 0; i < LENGTH; i++){
+		      int randomInt = randomGenerator.nextInt(1000000);
+		      arrayMerge[i] = randomInt;
+		      arrayRadix[i] = randomInt;
+		    }
+		    
+		    try {
+				double MergeTime = (double) MergeSort.start(arrayMerge)/1000000000.0;
+				double RadixTime = (double) RadixSort.start(arrayRadix)/1000000000.0;
 			
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-
-	   /*
-	    boolean flag = false;
-	    for(int i = 0; i < LENGTH; i++){
-	    	if(arrayMerge[i] != arrayRadix[i]){
-	    		flag = true;
-	    	}
+				
+				System.out.println("--------- LENGTH: " + LENGTH + " ---------");
+				System.out.println("Merge: " + MergeTime + " seconds");
+				System.out.println("Radix: " + RadixTime + " seconds");
+				
+				
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		    
 	    }
-	    if(flag){
-    		System.out.println("Arrays Do Not Match.");
-	    }else{
-    		System.out.println("Arrays Match.");
-	    }
-	  */
+	    
 	}
 
 }
