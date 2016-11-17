@@ -15,7 +15,7 @@ public class Driver {
 		int LENGTH = 16;
 	    Random randomGenerator = new Random(42);
 	    
-	    for(int k = 2; LENGTH < 1000000; LENGTH = LENGTH*k){
+	    for(int k = 2; LENGTH < 10000000; LENGTH = LENGTH*k){
 	    	
 		    int[] arrayMerge = new int[LENGTH];
 		    int[] arrayRadix = new int[LENGTH];
@@ -30,11 +30,11 @@ public class Driver {
 				double MergeTime = (double) MergeSort.start(arrayMerge)/1000000000.0;
 				double RadixTime = (double) RadixSort.start(arrayRadix)/1000000000.0;
 			
-				
+		/*		
 				System.out.println("--------- LENGTH: " + LENGTH + " ---------");
 				System.out.println("Merge: " + MergeTime + " seconds");
 				System.out.println("Radix: " + RadixTime + " seconds");
-				
+		*/		
 				
 			} catch (Throwable e) {
 				e.printStackTrace();
