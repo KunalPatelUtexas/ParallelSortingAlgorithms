@@ -228,7 +228,7 @@ public class  BitonicSort {
 					e.printStackTrace(System.out);
 			    }
 			}
-		}
+	}
 	
 	
 	 // tester
