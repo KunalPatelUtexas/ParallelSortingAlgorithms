@@ -15,26 +15,30 @@ public class Driver {
 		int LENGTH = 16;
 	    Random randomGenerator = new Random(42);
 	    
-	    for(int k = 2; LENGTH < 10000000; LENGTH = LENGTH*k){
+	    for(int k = 2; LENGTH < 1000000; LENGTH = LENGTH*k){
 	    	
 		    int[] arrayMerge = new int[LENGTH];
 		    int[] arrayRadix = new int[LENGTH];
+		    int[] arrayBitonic = new int[LENGTH];
 	 
 		    for (int i = 0; i < LENGTH; i++){
 		      int randomInt = randomGenerator.nextInt(1000000);
 		      arrayMerge[i] = randomInt;
 		      arrayRadix[i] = randomInt;
+		      arrayBitonic[i] = randomInt;
 		    }
 		    
 		    try {
 				double MergeTime = (double) MergeSort.start(arrayMerge)/1000000000.0;
 				double RadixTime = (double) RadixSort.start(arrayRadix)/1000000000.0;
+				double BitonicTime = (double) BitonicSort.startParallel(arrayRadix)/1000000000.0;
 			
-		/*		
+				
 				System.out.println("--------- LENGTH: " + LENGTH + " ---------");
 				System.out.println("Merge: " + MergeTime + " seconds");
 				System.out.println("Radix: " + RadixTime + " seconds");
-		*/		
+				System.out.println("Bitonic: " + BitonicTime + " seconds");
+				
 				
 			} catch (Throwable e) {
 				e.printStackTrace();
