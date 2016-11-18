@@ -17,7 +17,7 @@ public class BrickSort {
 			int size = list.length;
 			
 			//old implementation
-			parallelBrickSort(list, size);
+			//parallelBrickSort(list, size);
 			
 			//new implementation
 			parallelBrickMergeSort(list, 0, size);
@@ -319,13 +319,14 @@ public class BrickSort {
 		
 		public void run() {
 			try {
-				BrickSort.brickMerge(list, start, len, dist);
+				BrickSort.parallelBrickMerge(list, start, len, dist);
 		    } catch (Exception e) {
 				e.printStackTrace(System.out);
 		    }
 		}
 	}
 	
+	/*
 	//tester
     public static void main(String args[]){
 	     int list[] = {23, 35, 88, 43, 16, 9, 12, 55};
@@ -335,4 +336,5 @@ public class BrickSort {
 	     
 	     System.out.println(Arrays.toString(list));
 	 }
+	 */
 }
