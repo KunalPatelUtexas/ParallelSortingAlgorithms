@@ -1,6 +1,7 @@
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BrickSort {
@@ -14,7 +15,13 @@ public class BrickSort {
 		public static long startParallel(int[] list) throws Throwable {
 			long startTime = System.nanoTime();
 			int size = list.length;
+			
+			//old implementation
 			parallelBrickSort(list, size);
+			
+			//new implementation
+			parallelBrickMergeSort(list, 0, size);
+			
 			long endTime = System.nanoTime();
 			return (endTime - startTime);
 		}
@@ -23,7 +30,13 @@ public class BrickSort {
 		public static long startSerial(int[] list) throws Throwable {
 			long startTime = System.nanoTime();
 			int size = list.length;
-			brickSort(list, size);
+			
+			//old implementation
+			//brickSort(list, size);
+			
+			//new implementation
+			brickMergeSort(list, 0, size);
+			
 			long endTime = System.nanoTime();
 			return (endTime - startTime);
 		}
@@ -161,15 +174,103 @@ public class BrickSort {
 		}     
 	}
 	
-	/* Bitonic Merge Sorter -
-	  * 	Bitonic Merge Sorter is a static inner class that is used by
+	////////////////////////////////////////
+	//IMPROVED IMPLEMENTATION: BRICK MERGE//
+	////////////////////////////////////////
+	
+	/*
+	 * Serial Implementation
+	 */
+	public static void brickMerge(int list[], int start, int len, int dist){
+		
+		int div = dist*2;
+		
+		if(div < len){
+			//even phase
+			brickMerge(list, start, len, div);
+			//odd phase
+			brickMerge(list, start + dist, len, div);
+			for(int i = start + dist; i + dist < start + len; i += div){
+				compareAndSwap(list, i, i + dist);
+			}
+		}
+		else{
+			compareAndSwap(list, start, start + dist);
+		}
+	}
+
+	public static void brickMergeSort(int[] list, int start, int len){
+		//recursion base case
+		if(len == 1){
+			return;
+		}
+		else{
+			//split and sort halves
+			int div = len/2;
+			brickMergeSort(list, start, div);
+			brickMergeSort(list, start + div, div);
+			//merge halves
+			brickMerge(list, start, len, 1);
+		}
+	}
+	
+	/*
+	 * Parallel Implementation
+	 */
+	public static void parallelBrickMerge(int list[], int start, int len, int dist){
+		
+		int div = dist*2;
+		
+		if(div < len){
+			//even phase
+			Thread even = new Thread(new BrickMergeSorter(list, start, len, div));
+			//odd phase
+			Thread odd = new Thread(new BrickMergeSorter(list, start + dist, len, div));
+			
+			even.start();
+			odd.start();
+			
+			try {
+				even.join();
+				odd.join();
+			} catch (InterruptedException ie) {}
+			
+			
+			for(int i = start + dist; i + dist < start + len; i += div){
+				compareAndSwap(list, i, i + dist);
+			}
+		}
+		else{
+			compareAndSwap(list, start, start + dist);
+		}
+	}
+
+	public static void parallelBrickMergeSort(int[] list, int start, int len){
+		//recursion base case
+		if(len == 1){
+			return;
+		}
+		else{
+			//split and sort halves
+			int div = len/2;
+			parallelBrickMergeSort(list, start, div);
+			parallelBrickMergeSort(list, start + div, div);
+			//merge halves
+			parallelBrickMerge(list, start, len, 1);
+		}
+	}
+	
+	
+	
+	
+	/* Brick Sorter -
+	  * 	Brick Sorter is a static inner class that is used by
 	  * 	each thread in merge to concurrently run their compare-
 	  * 	and-swap operations on the array "list".
 	  * 	
 	  * Inputs:	int list[] 		- array of integers
-	  * 		int size		- the size of array "list"
-	  * 		int start		- the starting position within the array
-	  * 		int direction	- ascending or descending order of sorting
+	  * 		int i			- index 1
+	  * 		int j			- index 2
 	  * 
 	  */
 	public static class  BrickSorter implements Runnable {
@@ -192,12 +293,45 @@ public class BrickSort {
 		}
 	}
 	
+	/* Brick Merge Sorter -
+	  * 	Brick Merge Sorter is a static inner class that is used by
+	  * 	each thread in merge to concurrently run their compare-
+	  * 	and-swap operations on the array "list".
+	  * 	
+	  * Inputs:	int list[] 		- array of integers
+	  * 		int start		- index 1
+	  * 		int len			- index 2
+	  * 		int dist		- 
+	  * 
+	  */
+	public static class  BrickMergeSorter implements Runnable {
+		private int[] list;
+		private int start;
+		private int len;
+		private int dist;
+		
+		public BrickMergeSorter(int[] list, int start, int len, int dist) {
+			this.list = list;
+			this.start = start;
+			this.len = len;
+			this.dist = dist;
+		}
+		
+		public void run() {
+			try {
+				BrickSort.brickMerge(list, start, len, dist);
+		    } catch (Exception e) {
+				e.printStackTrace(System.out);
+		    }
+		}
+	}
+	
 	//tester
     public static void main(String args[]){
 	     int list[] = {23, 35, 88, 43, 16, 9, 12, 55};
 	     int size = list.length;
 	     
-	     parallelBrickSort(list, size);
+	     parallelBrickMergeSort(list, 0, size);
 	     
 	     System.out.println(Arrays.toString(list));
 	 }
