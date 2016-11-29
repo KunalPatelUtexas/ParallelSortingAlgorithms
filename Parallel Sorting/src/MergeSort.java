@@ -1,6 +1,16 @@
 import java.util.*;
 
-
+/*
+ * Psudocode:
+ * 	ParallelSort(List)
+ * 		if List > 1
+ * 			Split List into Left and Right
+ * 			In Parallel:
+ * 				ParallelSort(Left)
+ * 				ParallelSort(Right)
+ * 			Merge Left and Right into List
+ * 
+ */
 public class  MergeSort {
 	private static final Random RAND = new Random(50);
 	private static final int cores = Runtime.getRuntime().availableProcessors();
